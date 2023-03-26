@@ -1,0 +1,103 @@
+     1                                  bits 32 
+     2                                  global start        
+     3                                  
+     4                                  extern exit              
+     5                                  import exit msvcrt.dll    
+     6                                  
+     7                                  ;a,b,c,d-byte; e-word; x-qword
+     8                                  segment data use32 class=data
+     9 00000000 14                          a db 20
+    10 00000001 0A                          b db 10
+    11 00000002 0F                          c db 15
+    12 00000003 05                          d db 5
+    13 00000004 0A00                        e dw 10
+    14 00000006 6400000000000000            x dq 100
+    15 0000000E <res 00000008>              rez resq 1
+    16                                  
+    17                                      ;(a*b-2*c*d)/(c-e)+x/a - fara semn
+    18                                  segment code use32 class=code
+    19                                      start:
+    20                                      
+    21                                      ;(a*b-2*c*d)/(c-e)+x/a - cu semn
+    22                                      ; a * b
+    23 00000000 A0[00000000]                mov al, [a]
+    24 00000005 F625[01000000]              mul byte [b] ; ax = a * b
+    25 0000000B 6689C1                      mov cx, ax ; cx = a * b 
+    26                                      
+    27                                      ;2 * c * d 
+    28 0000000E A0[02000000]                mov al, [c] 
+    29 00000013 F625[03000000]              mul byte [d] ; ax = c * d 
+    30 00000019 66BB0200                    mov bx, 2 
+    31 0000001D 66F7E3                      mul bx ; ax = ax * bx = 2 * c * d
+    32                                      
+    33                                      ;a * b - 2 * c * d 
+    34 00000020 6619C1                      sbb  cx, ax ; cx = cx - ax 
+    35 00000023 6689CB                      mov bx, cx ; bx = cx - ax
+    36 00000026 6689D8                      mov ax, bx
+    37 00000029 6699                        cwd 
+    38                                      
+    39                                      ; ;(a*b-2*c*d)/(c-e)
+    40 0000002B 66B90000                    mov cx, 0
+    41 0000002F 8A0D[02000000]              mov cl, [c]
+    42 00000035 6698                        cbw ; cx = c 
+    43 00000037 661B0D[04000000]            sbb cx, [e] ;cx = c - e 
+    44 0000003E 66F7F1                      div word cx ; ax = dx:ax / cx 
+    45 00000041 6689C1                      mov cx, ax 
+    46                                      
+    47                                      ;x/a 
+    48 00000044 A1[06000000]                mov eax, [x]
+    49 00000049 99                          cdq 
+    50 0000004A 8A1D[00000000]              mov bl, [a]
+    51 00000050 6698                        cbw 
+    52 00000052 6699                        cwd 
+    53 00000054 66F7F3                      div dword bx ; eax = edx:eax / ebx
+    53          ******************       warning: register size specification ignored
+    54                                      
+    55                                      ;(a*b-2*c*d)/(c-e)+x/a
+    56 00000057 11C8                        adc eax,ecx 
+    57 00000059 A3[0E000000]                mov [rez], eax 
+    58                                      
+    59                                      ; ;a * b
+    60                                      ; mov al, [a]
+    61                                      ; mul byte [b] ; ax = a * b
+    62                                      ; mov cx, ax ; cx = a * b 
+    63                                      
+    64                                      ; ;2*c*d 
+    65                                      ; mov al, [c] 
+    66                                      ; mul byte [d] ; ax = c * d 
+    67                                      ; mov bx, 2 
+    68                                      ; mul bx ; ax = ax * bx = 2 * c * d 
+    69                                      
+    70                                      
+    71                                      ; ;(a*b-2*c*d)
+    72                                      ; sbb  cx, ax ; cx = cx - ax 
+    73                                      ; mov bx, cx ; bx = cx - ax
+    74                                      ; mov ax, bx
+    75                                      ; mov dx, 0 ; dx:ax = cx - ax 
+    76                                   
+    77                                      ; ;(a*b-2*c*d)/(c-e)
+    78                                      ; mov cx, 0
+    79                                      ; mov cl, [c]
+    80                                      ; mov ch, 0 ;cx = c
+    81                                      ; sbb cx, [e] ;cx = c - e 
+    82                                      ; div word cx ; ax = dx:ax / cx 
+    83                                      ; mov cx, ax 
+    84                                      
+    85                                      ; ;x/a 
+    86                                      ; mov eax, [x]
+    87                                      ; mov edx, 0 ; edx:eax = x 
+    88                                      ; mov bl, [a]
+    89                                      ; mov bh, 0 ; bx = a
+    90                                      ; mov dx, 0 ; dx:bx = a
+    91                                      ; div dword bx ; eax = edx:eax / ebx
+    92                                      
+    93                                      ; ;(a*b-2*c*d)/(c-e)+x/a
+    94                                      ; mov dx, 0; dx:cx = cx 
+    95                                      ; adc eax,ecx 
+    96                                      ; mov [rez], eax 
+    97                                      
+    98                                    
+    99                                      
+   100                                      
+   101 0000005E 6A00                            push    dword 0     
+   102 00000060 FF15[00000000]                  call    [exit]       

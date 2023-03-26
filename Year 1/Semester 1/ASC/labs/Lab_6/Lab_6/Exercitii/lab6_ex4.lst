@@ -1,0 +1,46 @@
+     1                                  bits 32
+     2                                  global start
+     3                                  
+     4                                  extern exit
+     5                                  import exit msvcrt.dll
+     6                                  
+     7                                  segment data use32 class=data
+     8 00000000 0703090105                  s1 db 7, 3, 9, 1, 5
+     9 00000005 020406080A                  s2 db 2, 4, 6, 8, 10
+    10                                      len equ $-s1
+    11 0000000A 00<rept>                    d times len db 0 
+    12                                      
+    13                                  ; Se dau 2 siruri de numere intregi s1 si s2 de lungimi egale.
+    14                                  ; Se cere sirul de numere intregi d obtinut astfel:
+    15                                  ; - d[i] = s1[i] - s2[i], daca s1[i] > s2[i]
+    16                                  ; - d[i] = s2[i] - s1[i], altfel.
+    17                                  segment code use32 class=code
+    18                                      start:
+    19 00000000 B90A000000                      mov ecx, len
+    20 00000005 BE00000000                      mov esi, 0
+    21 0000000A BF00000000                      mov edi, 0 
+    22 0000000F E327                            jecxz sfarsit
+    23                                          
+    24                                      repeta:
+    25 00000011 8A86[00000000]                  mov al, [s1+esi]
+    26 00000017 8A9E[05000000]                  mov bl, [s2+esi]
+    27 0000001D 38D8                            cmp al,bl ;ZF = 1 (s1 > s2)
+    28 0000001F 46                              inc esi
+    29 00000020 770A                            ja mai_mare
+    30                                          
+    31 00000022 28C3                            sub bl, al
+    32 00000024 889F[0A000000]                  mov [d+edi], bl 
+    33 0000002A EB09                            jmp mai_departe
+    34                                          
+    35                                      mai_mare: 
+    36 0000002C 28D8                            sub al, bl 
+    37 0000002E 8887[0A000000]                  mov [d+edi], al 
+    38 00000034 47                              inc edi
+    39                                       
+    40                                      mai_departe:
+    41 00000035 47                              inc edi 
+    42 00000036 E2D9                            loop repeta
+    43                                      
+    44                                      sfarsit:
+    45 00000038 6A00                            push dword 0        
+    46 0000003A FF15[00000000]                  call [exit]        

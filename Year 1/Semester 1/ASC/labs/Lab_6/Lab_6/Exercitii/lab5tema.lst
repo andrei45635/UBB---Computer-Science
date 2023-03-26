@@ -1,0 +1,57 @@
+     1                                  bits 32 
+     2                                  global start        
+     3                                  
+     4                                  extern exit               
+     5                                  import exit msvcrt.dll    
+     6                                  
+     7                                  ; Se dau doua siruri de caractere S1 si S2. 
+     8                                  ; Sa se construiasca sirul D prin concatenarea elementelor sirului S2 
+     9                                  ; in ordine inversa cu elementele de pe pozitiile pare din sirul S1.
+    10                                  segment data use32 class=data
+    11 00000000 2B32326238365838            s1 db '+', '2', '2', 'b', '8', '6', 'X', '8'
+    12                                      len1 equ $-s1
+    13 00000008 613435                      s2 db 'a', '4', '5'
+    14                                      len2 equ $-s2
+    15 0000000B 00<rept>                    d times len2+len1/2 db 0 
+    16                                  ; Exemplu:  
+    17                                  ; S1: '+', '2', '2', 'b', '8', '6', 'X', '8'
+    18                                  ; S2: 'a', '4', '5'
+    19                                  ; D: '5', '4', 'a', '2','b', '6', '8'
+    20                                  segment code use32 class=code
+    21                                      start:
+    22 00000000 B903000000                      mov ecx, len2
+    23 00000005 BF[0B000000]                    mov edi, d
+    24 0000000A BB[08000000]                    mov ebx, s2
+    25 0000000F E309                            jecxz start1
+    26                                      
+    27                                      repeta1:
+    28 00000011 8A440BFF                        mov al, [ebx+ecx-1] 
+    29 00000015 8807                            mov [edi], al 
+    30 00000017 47                              inc edi 
+    31 00000018 E2F7                            loop repeta1 
+    32                                      
+    33                                      start1:
+    34 0000001A B908000000                      mov ecx, len1
+    35 0000001F BB[00000000]                    mov ebx, s1
+    36 00000024 B801000000                      mov eax, 1
+    37 00000029 BE01000000                      mov esi, 1
+    38 0000002E E311                            jecxz ending 
+    39                                      
+    40                                      repeta2:
+    41 00000030 83F901                          cmp ecx, 1
+    42 00000033 740C                            jz ending
+    43 00000035 8A1433                          mov dl, [ebx+esi]
+    44 00000038 83C602                          add esi, 2
+    45 0000003B 8817                            mov [edi], dl 
+    46 0000003D 47                              inc edi
+    47 0000003E 49                              dec ecx 
+    48 0000003F E2EF                            loop repeta2
+    49                                      
+    50                                      ; par:
+    51                                         ; mov [edi], dl 
+    52                                         ; inc edi
+    53                                         ; loop repeta2
+    54                                      
+    55                                      ending:
+    56 00000041 6A00                            push    dword 0      
+    57 00000043 FF15[00000000]                  call    [exit]       

@@ -1,0 +1,84 @@
+     1                                  bits 32 
+     2                                  global start        
+     3                                  extern exit              
+     4                                  import exit msvcrt.dll    
+     5                                                            
+     6                                      ;a - byte, b - word, c - double word, d - qword                     
+     7                                  segment data use32 class=data
+     8 00000000 0A                          a db 10
+     9 00000001 0F00                        b dw 15
+    10 00000003 19000000                    c dd 25
+    11 00000007 2800000000000000            d dq 40
+    12                                      
+    13                                      ; ;((a + a) + (b + b) + (c + c)) - d - fara semn
+    14                                  segment code use32 class=code
+    15                                      start:
+    16                                      ; a+a
+    17 00000000 A0[00000000]                mov al, [a] 
+    18 00000005 B400                        mov ah,0    ;ax = a
+    19 00000007 6601C0                      add ax, ax 
+    20 0000000A 66BA0000                    mov dx, 0 
+    21 0000000E 6683D200                    adc dx, 0
+    22                                      
+    23                                      
+    24                                      ;b+b
+    25 00000012 668B1D[01000000]            mov bx, [b] ;bx = b
+    26 00000019 6601C3                      add bx, ax 
+    27 0000001C 66B90000                    mov cx, 0 
+    28 00000020 6611D1                      adc cx, dx 
+    29                                      
+    30                                      ;c + c
+    31 00000023 8B0D[03000000]              mov ecx, [c]
+    32 00000029 130D[03000000]              adc ecx, [c]
+    33                                      
+    34                                      ;(a + a) + (b + b)
+    35 0000002F 6611D8                      adc ax, bx ;ax = ax+bx+cf (daca avem cf)
+    36                                      
+    37                                      ;(a + a) + (b + b) + (c + c) - d
+    38 00000032 66BA0000                    mov dx, 0   ; ax = dx:ax
+    39 00000036 11C8                        adc eax, ecx ; eax = eax + ecx 
+    40 00000038 1B05[07000000]              sbb eax, [d] ; eax = eax - d
+    41                                      
+    42                                      ; -------------------------------------------------
+    43                                      
+    44                                      ; a + b + c + d - (a + b) - cu semn 
+    45                                      ; a + b 
+    46 0000003E A0[00000000]                mov al, [a]
+    47 00000043 6698                        cbw ;ax = a
+    48 00000045 668B1D[01000000]            mov bx, [b]
+    49 0000004C 6611D8                      adc ax, bx ; ax = a + b 
+    50 0000004F 98                          cwde ; eax = a + b 
+    51                                      
+    52                                      ; c + d 
+    53 00000050 668B0D[03000000]            mov cx, [c]
+    54 00000057 98                          cwde ;ecx = c 
+    55 00000058 8B15[07000000]              mov edx, [d]
+    56 0000005E 11D1                        adc ecx, edx ; ecx = ecx + edx 
+    57                                      
+    58                                      ;a + b + c + d - (a + b)
+    59 00000060 11C8                        adc eax, ecx ; eax = eax + ecx 
+    60 00000062 89C2                        mov edx, eax 
+    61 00000064 19C2                        sbb edx, eax ; edx = edx - eax = eax + ecx - eax = ecx 
+    62                                      
+    63                                      ; ((a + a) + (b + b) + (c + c)) - d - cu semn 
+    64                                      ; ; a + a
+    65                                      ; mov al, [a]
+    66                                      ; cbw  ; ax = a
+    67                                      ; adc ax, ax
+    68                                      
+    69                                      ; ; b + b
+    70                                      ; mov bx, [b]
+    71                                      ; adc bx, bx
+    72                                      
+    73                                      ; ; c + c
+    74                                      ; mov ecx, [c]
+    75                                      ; adc ecx, [c]
+    76                                      
+    77                                      ; ; (a + a) + (b + b) + (c + c)) - d
+    78                                      ; adc ax, bx ;ax = ax + bx = a + a + b + b
+    79                                      ; cwde ; ax -> eax, astfel eax = a + a + b + b 
+    80                                      ; adc eax, ecx ; eax = a + a + b + b + c + c
+    81                                      ; sbb eax, [d] ; eax = (a + a) + (b + b) + (c + c)) - d
+    82                                      
+    83 00000066 6A00                            push    dword 0      
+    84 00000068 FF15[00000000]                  call    [exit]       

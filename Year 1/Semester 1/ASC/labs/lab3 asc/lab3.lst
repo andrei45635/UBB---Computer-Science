@@ -1,0 +1,32 @@
+     1                                  bits 32 ; assembling for the 32 bits architecture
+     2                                  
+     3                                  ; declare the EntryPoint (a label defining the very first instruction of the program)
+     4                                  global start        
+     5                                  
+     6                                  ; declare external functions needed by our program
+     7                                  extern exit               ; tell nasm that exit exists even if we won't be defining it
+     8                                  import exit msvcrt.dll    ; exit is a function that ends the calling process. It is defined in msvcrt.dll
+     9                                                            ; msvcrt.dll contains exit, printf and all the other important C-runtime specific functions
+    10                                  
+    11                                  ; our data is declared here (the variables needed by our program)
+    12                                  segment data use32 class=data
+    13 00000000 0A                          a db 10 
+    14 00000001 14                          b db 20
+    15 00000002 0A                          c db 10
+    16 00000003 <res 00000001>              rez resb 1
+    17                                  
+    18                                      ;a+b/c
+    19                                  segment code use32 class=code
+    20                                      start:
+    21                                          
+    22                                          ;b/c
+    23 00000000 A0[01000000]                    MOV AL, [b]
+    24 00000005 B400                            MOV AH, 0                   ; AX = b (am extins b pe 16 biti fara semn)
+    25 00000007 F635[02000000]                  DIV BYTE [c]                ; AL = AX / c
+    26                                          
+    27                                          ;a +b/c
+    28 0000000D 0205[00000000]                  ADD AL, [a]                 ;AL = AL + a <=> AL = a + b/c
+    29 00000013 A2[03000000]                    MOV [rez], AL
+    30                                          
+    31 00000018 6A00                            push    dword 0      
+    32 0000001A FF15[00000000]                  call    [exit]       

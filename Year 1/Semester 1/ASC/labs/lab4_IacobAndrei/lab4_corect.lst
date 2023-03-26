@@ -1,0 +1,57 @@
+     1                                  bits 32 
+     2                                  global start        
+     3                                  
+     4                                  
+     5                                  extern exit               
+     6                                  import exit msvcrt.dll   
+     7                                  
+     8                                  ; Se dau octetii A si B. Sa se obtina dublucuvantul C:
+     9                                  ; bitii 16-31 ai lui C sunt 1
+    10                                  ; bitii 0-3 ai lui C coincid cu bitii 3-6 ai lui B
+    11                                  ; bitii 4-7 ai lui C au valoarea 0
+    12                                  ; bitii 8-10 ai lui C au valoarea 110
+    13                                  ; bitii 11-15 ai lui C coincid cu bitii 0-4 ai lui A
+    14                                  segment data use32 class=data
+    15 00000000 5E                          a db 01011110b
+    16 00000001 39                          b db 00111001b
+    17 00000002 00000000                    cd dd 0
+    18                                  
+    19                                  ; our code starts here
+    20                                  segment code use32 class=code
+    21                                      ;vom calcula rezultatul in ebx
+    22                                      start:
+    23 00000000 BB00000000                  mov ebx, 0 
+    24                                      
+    25                                      ;bitii 16-31 ai lui C sunt 1
+    26                                      ;fortam 1 pe bitii 16-31 din C
+    27 00000005 81CB0000FFFF                or ebx, 11111111111111110000000000000000b
+    28                                      
+    29                                      ;bitii 11-15 ai lui C coincid cu bitii 0-4 ai lui A
+    30 0000000B 66A1[00000000]              mov ax, [a] ;izolam bitii 0-4 ai lui A
+    31 00000011 6699                        cwd 
+    32 00000013 83E01F                      and eax, 00000000000000000000000000011111b
+    33 00000016 B10B                        mov cl, 11
+    34 00000018 D3C0                        rol eax, cl ;deplasam bitii 11 pozitii in rezultat 
+    35 0000001A 09C3                        or ebx, eax 
+    36                                      
+    37                                      ;bitii 8-10 ai lui C au valoarea 110
+    38                                      ;bitii 8-9 au valoarea 11 
+    39                                      ;fortam 1 pe bitii 8-9
+    40 0000001C 81CB00060000                or ebx, 00000000000000000000011000000000b
+    41                                  
+    42                                      ;bitii 4-7 ai lui C au valoarea 0
+    43                                      ;fortam 0 pe bitii 4-7
+    44 00000022 83CB00                      or ebx, 00000000000000000000000000000000b
+    45                                      
+    46                                      ;bitii 0-3 ai lui C coincid cu bitii 3-6 ai lui B
+    47 00000025 66A1[01000000]              mov ax, [b] ;izolam bitii 3-6 ai lui b 
+    48 0000002B 6699                        cwd 
+    49 0000002D 83E078                      and eax, 00000000000000000000000001111000b
+    50 00000030 B103                        mov cl, 3
+    51 00000032 D3C8                        ror eax, cl ;rotim spre dreapta cu 3 pozitii
+    52 00000034 09C3                        or ebx, eax 
+    53                                      
+    54 00000036 891D[02000000]              mov [cd], ebx 
+    55                                      
+    56 0000003C 6A00                            push    dword 0      ; push the parameter for exit onto the stack
+    57 0000003E FF15[00000000]                  call    [exit]       ; call exit to terminate the program

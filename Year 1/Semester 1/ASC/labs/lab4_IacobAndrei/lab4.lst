@@ -1,0 +1,44 @@
+     1                                  bits 32 
+     2                                  global start  
+     3                                        
+     4                                  extern exit               
+     5                                  import exit msvcrt.dll    
+     6                                  
+     7                                  ; Se dau octetii A si B. Sa se obtina dublucuvantul C
+     8                                  ; bitii 8-15 ai lui C sunt 0
+     9                                  ; bitii 16-23 ai lui C coincid cu bitii lui B
+    10                                  ; bitii 24-31 ai lui C coincid cu bitii lui A
+    11                                  ; bitii 0-7 ai lui C sunt 1
+    12                                  segment data use32 class=data
+    13 00000000 5E                          a db 01011110b
+    14 00000001 39                          b db 00111001b
+    15 00000002 00000000                    c dd 0
+    16                                  
+    17                                  segment code use32 class=code
+    18                                      start:
+    19 00000000 BB00000000                  mov ebx, 0 ;in ebx calculam rezultatul
+    20                                      
+    21                                      ;bitii 8-15 ai lui C sunt 0 
+    22                                      ;fortam 0 pe pozitiile 8-15 din C
+    23 00000005 81CB7F80FFFF                or ebx, 11111111111111111000000001111111b
+    24                                      
+    25                                      ;bitii 16-23 ai lui C coincid cu bitii lui B
+    26 0000000B 66BA0000                    mov dx, 0
+    27 0000000F 66A1[01000000]              mov ax, [b] ;eax = b 
+    28 00000015 C1C008                      rol eax, 8 ;rotim 8 pozitii spre stanga
+    29 00000018 09C3                        or ebx, eax  ;punem in rezultat
+    30                                      
+    31                                      ; bitii 24-31 ai lui C coincid cu bitii lui A
+    32 0000001A 66BA0000                    mov dx, 0
+    33 0000001E 668B0D[00000000]            mov cx, [a] ;ecx = a 
+    34 00000025 C1C108                      rol ecx, 8
+    35 00000028 09CB                        or ebx, ecx ;idem mai sus
+    36                                      
+    37                                      ; bitii 0-7 ai lui C sunt 1
+    38 0000002A 81E380FFFF7F                and ebx, 1111111111111111111111110000000b
+    39                                      
+    40 00000030 891D[02000000]              mov [c], ebx 
+    41                                      
+    42                                  
+    43 00000036 6A00                            push    dword 0      
+    44 00000038 FF15[00000000]                  call    [exit]       

@@ -1,0 +1,11 @@
+Descrierea soluției backtracking
+Rezolvare problema 8
+
+soluție candidat:
+x= (x0, x1,. .. , xk), xi∈(0,1,.. , N−1)
+
+condiție consistent:
+x= (x0, x1,. .. , xk) e consistent dacă xi≠ xj, daca x0 == 0 si xk == 0 pentru∀ i≠ j
+
+condiție soluție:
+x= (x0, x1,. .. , xk) e soluţie dacă e consistent şi k= 2N+1 si daca len(solutie) = 2*dim+1

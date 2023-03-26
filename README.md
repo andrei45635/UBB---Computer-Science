@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>University</title>
 </head>
 <body>
 <h2> My projects as a student at UBB, Faculty of Mathematics and Computer Science, taught in Romanian </h2>

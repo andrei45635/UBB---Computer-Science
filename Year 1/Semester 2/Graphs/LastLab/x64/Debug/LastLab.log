@@ -1,0 +1,3 @@
+﻿  main.cpp
+C:\Users\Andrei\Desktop\Facultate\Grafuri\LastLab\main.cpp(22): warning C4715: 'determina_frunza_minima': not all control paths return a value
+  LastLab.vcxproj -> C:\Users\Andrei\Desktop\Facultate\Grafuri\LastLab\x64\Debug\LastLab.exe

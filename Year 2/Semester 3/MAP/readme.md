@@ -1,7 +1,8 @@
 ##Advanced Programming Methods 
 <p> Tools used: JavaFX, JDBC, Gradle and LINQ (for C#) </p>
-<p> What I built: </p>
-<ul>
-  <li>Mock Social Network (Java)</li>
-  <li>Basketball Management App (C#) </li>
-  </ul>
+<p> Semester projects that I built: </p>
+  <ol>
+    <li> <a href="https://github.com/andrei45635/Lab6_SocialNetwork_GUI"> Mock Social Network </li>
+    <li> <a href="https://github.com/andrei45635/BonusProject/tree/master"> Basketball Management App </li>
+  </ol>
+

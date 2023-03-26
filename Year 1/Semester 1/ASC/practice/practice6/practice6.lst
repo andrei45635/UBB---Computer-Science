@@ -1,0 +1,135 @@
+     1                                  bits 32 
+     2                                  global start        
+     3                                  
+     4                                  extern exit, fopen, fclose, fread, printf, fwrite, scanf, fprintf               
+     5                                  import exit msvcrt.dll    
+     6                                  import fopen msvcrt.dll 
+     7                                  import fclose msvcrt.dll 
+     8                                  import fread msvcrt.dll
+     9                                  import printf msvcrt.dll
+    10                                  import fwrite msvcrt.dll
+    11                                  import scanf msvcrt.dll
+    12                                  import fprintf msvcrt.dll  
+    13                                  
+    14                                  ; write a program that will read from keyboard a filename input.txt and a character c.
+    15                                  ; the input file input.txt contains words separated by space. write in the file output.txt 
+    16                                  ; only the words that contain the character c
+    17                                  segment data use32 class=data
+    18                                  
+    19 00000000 707261637469636536-         nume_fisier_input db 'practice6.txt', 0
+    19 00000009 2E74787400         
+    20 0000000E 7200                        mod_acces_input db 'r', 0
+    21 00000010 FFFFFFFF                    descriptor_input dd -1
+    22 00000014 00000000                    c dd 0
+    23 00000018 256300                      caracter db '%c', 0
+    24 0000001B 496E74726F64756365-         format_citire db 'Introduceti caracterul c= ', 0
+    24 00000024 746920636172616374-
+    24 0000002D 6572756C20633D2000 
+    25 00000036 6F75747075742E7478-         nume_fisier_output db 'output.txt', 0
+    25 0000003F 7400               
+    26 00000041 7700                        mod_acces_output db 'w', 0
+    27 00000043 FFFFFFFF                    descriptor_output dd -1
+    28 00000047 00                          text db 0
+    29                                      len_text equ 100 
+    30 00000048 <res 00000064>              buffer resb len_text 
+    31 000000AC 00<rept>                    result_text times len_text db 0
+    32 00000110 00000000                    nr_car_citite dd 0 
+    33                                     
+    34                                  segment code use32 class=code
+    35                                      start:
+    36                                         ;opening the first file 
+    37                                         ;eax = fopen(nume_fisier_input, mod_acces_input)
+    38 00000000 68[0E000000]                   push dword mod_acces_input
+    39 00000005 68[00000000]                   push dword nume_fisier_input
+    40 0000000A FF15[00000000]                 call [fopen]
+    41 00000010 83C408                         add esp, 4*2
+    42                                         
+    43 00000013 A3[10000000]                   mov [descriptor_input], eax
+    44                                         
+    45 00000018 83F800                         cmp eax, 0
+    46 0000001B 0F84B5000000                   je final 
+    47                                         
+    48                                         ;opening the second file 
+    49                                         ;eax = fopen(nume_fisier_output, mod_acces_output)
+    50 00000021 68[41000000]                   push dword mod_acces_output
+    51 00000026 68[36000000]                   push dword nume_fisier_output 
+    52 0000002B FF15[00000000]                 call [fopen]
+    53 00000031 83C408                         add esp, 4*2
+    54                                         
+    55 00000034 A3[43000000]                   mov [descriptor_output], eax 
+    56                                         
+    57 00000039 83F800                         cmp eax, 0
+    58 0000003C 0F8494000000                   je final 
+    59                                         
+    60                                         ;printf(format_citire)
+    61 00000042 68[1B000000]                   push dword format_citire
+    62 00000047 FF15[00000000]                 call [printf]
+    63 0000004D 83C404                         add esp, 4
+    64                                         
+    65                                         ;scanf(caracter, c)
+    66 00000050 68[14000000]                   push dword c 
+    67 00000055 68[18000000]                   push dword caracter
+    68 0000005A FF15[00000000]                 call [scanf]
+    69 00000060 83C408                         add esp, 4*2
+    70                                         
+    71                                         
+    72                                      repeta:
+    73                                          ;reading the elements of the string from the input file 
+    74                                          ;fread(buffer, 1, len_text, descriptor_input)
+    75 00000063 FF35[10000000]                  push dword [descriptor_input] 
+    76 00000069 6A64                            push dword len_text
+    77 0000006B 6A01                            push dword 1 
+    78 0000006D 68[48000000]                    push dword buffer 
+    79 00000072 FF15[00000000]                  call [fread]
+    80 00000078 83C410                          add esp, 4*4
+    81                                          
+    82 0000007B A3[10010000]                    mov [nr_car_citite], eax
+    83                                          
+    84 00000080 66833D[10010000]00              cmp word [nr_car_citite], 0
+    85 00000088 7440                            je error  
+    86                                          
+    87 0000008A 89C1                            mov ecx, eax
+    88 0000008C BE[47000000]                    mov esi, text 
+    89 00000091 BF[AC000000]                    mov edi, result_text
+    90                                          repeta2:
+    91 00000096 AC                                  lodsb
+    92 00000097 3A05[14000000]                      cmp al, [c]
+    93 0000009D 750A                                jne repeating
+    94 0000009F AA                                  stosb
+    95                                              repetat_spatiu:
+    96 000000A0 AC                                      lodsb ;eu m-am gandit ca dupa ce verificam daca in al este caracterul cautat,
+    97                                                        ;atunci o sa tot punem caracterele pana la spatiu
+    98                                                        ;cand ajungem la spatiu, sarim 
+    99 000000A1 3C20                                    cmp al, 20h ;verificam daca e spatiu 
+   100 000000A3 7403                                    je out_spatiu
+   101 000000A5 AA                                      stosb
+   102 000000A6 EBF8                                    jmp repetat_spatiu
+   103                                          out_spatiu:           
+   104 000000A8 AA                                  stosb
+   105                                          repeating:
+   106 000000A9 E2EB                                loop repeta2
+   107                                              
+   108                                              ;fwrite(buffer, 1, len_text, descriptor_output)
+   109 000000AB FF35[43000000]                      push dword [descriptor_output]
+   110 000000B1 6A64                                push dword len_text
+   111 000000B3 6A01                                push dword 1 
+   112 000000B5 68[AC000000]                        push dword result_text 
+   113 000000BA FF15[00000000]                      call [fwrite]
+   114 000000C0 83C410                              add esp, 4*4 
+   115                                              
+   116 000000C3 83F800                              cmp eax, 0 
+   117 000000C6 7402                                je error
+   118                                              
+   119 000000C8 EB99                                jmp repeta 
+   120                                              error:
+   121                                                  ;closing practice6.txt 
+   122                                                  ;fclose(descriptor_input)
+   123 000000CA FF35[10000000]                          push dword [descriptor_input]
+   124                                                  
+   125                                                  ;closing output.txt 
+   126                                                  ;fclose(descriptor_output)
+   127 000000D0 FF35[43000000]                          push dword [descriptor_output]
+   128                                  
+   129                                      final:   
+   130 000000D6 6A00                           push    dword 0      
+   131 000000D8 FF15[00000000]                 call    [exit]       

@@ -1,0 +1,106 @@
+     1                                  bits 32 
+     2                                  global start        
+     3                                  
+     4                                  extern exit, printf, scanf, fopen, fclose, fprintf               
+     5                                  import exit msvcrt.dll    
+     6                                  import printf msvcrt.dll
+     7                                  import scanf msvcrt.dll
+     8                                  import fopen msvcrt.dll
+     9                                  import fclose msvcrt.dll
+    10                                  import fprintf msvcrt.dll
+    11                                  
+    12                                  ;Sa se citeasca de la tastatura un nume de fisier si un text (definite in segmentul de date). 
+    13                                  ;Textul contine litere mici, litere mari, cifre si caractere speciale. Sa se inlocuiasca toate spatiile din textul dat cu caracterul 'S'. 
+    14                                  ;Sa se creeze un fisier cu numele dat si sa se scrie textul obtinut prin inlocuire in fisier.
+    15                                  segment data use32 class=data
+    16                                     
+    17 00000000 496E74726F64756365-        create_fisier_nume db 'Introduceti numele fisierului= ', 0
+    17 00000009 7469206E756D656C65-
+    17 00000012 20666973696572756C-
+    17 0000001B 75693D2000         
+    18 00000020 496E74726F64756365-        read_text db 'Introduceti textul= ', 0
+    18 00000029 74692074657874756C-
+    18 00000032 3D2000             
+    19 00000035 257300                     format_read_text db '%s', 0
+    20 00000038 257300                     format_create_fisier db '%s', 0
+    21 0000003B 00                         nume_fisier db 0
+    22 0000003C 7700                       mod_acces db 'w', 0
+    23 0000003E FFFFFFFF                   descriptor dd -1
+    24 00000042 00                         text db 0
+    25                                     len_text equ $-text 
+    26 00000043 00                         result_text times len_text db 0
+    27 00000044 45726F617265206C61-        msg_err db 'Eroare la deschiderea fisierului wai boule', 0
+    27 0000004D 206465736368696465-
+    27 00000056 726561206669736965-
+    27 0000005F 72756C756920776169-
+    27 00000068 20626F756C6500     
+    28                                     
+    29                                  segment code use32 class=code
+    30                                      start:
+    31                                          ;printf(create_fisier_nume)
+    32 00000000 68[00000000]                    push dword create_fisier_nume
+    33 00000005 FF15[00000000]                  call [printf]
+    34 0000000B 83C404                          add esp, 4
+    35                                          
+    36                                          ;scanf(format_create_fisier, nume_fisier)
+    37 0000000E 68[3B000000]                    push dword nume_fisier
+    38 00000013 68[38000000]                    push dword format_create_fisier
+    39 00000018 FF15[00000000]                  call [scanf]
+    40 0000001E 83C408                          add esp, 4*2
+    41                                          
+    42                                          ;eax = fopen(nume_fisier, mod_acces)
+    43 00000021 68[3C000000]                    push dword mod_acces
+    44 00000026 68[3B000000]                    push dword nume_fisier
+    45 0000002B FF15[00000000]                  call [fopen]
+    46 00000031 83C408                          add esp, 4*2 
+    47                                          
+    48 00000034 A3[3E000000]                    mov [descriptor], eax 
+    49 00000039 83F800                          cmp eax, 0
+    50 0000003C 745B                            je err_ 
+    51                                          
+    52                                      repeta:
+    53                                          
+    54                                          ;printf(read_text)
+    55 0000003E 68[20000000]                    push dword read_text
+    56 00000043 FF15[00000000]                  call [printf]
+    57 00000049 83C404                          add esp, 4
+    58                                          
+    59                                          ;scanf(format_read_text, text)
+    60 0000004C 68[42000000]                    push dword text 
+    61 00000051 68[35000000]                    push dword format_read_text
+    62 00000056 FF15[00000000]                  call [scanf]
+    63 0000005C 83C408                          add esp, 4*2
+    64                                          
+    65 0000005F 89C1                            mov ecx, eax 
+    66 00000061 E344                            jecxz final  
+    67 00000063 BE[42000000]                    mov esi, text 
+    68 00000068 BF[43000000]                    mov edi, result_text
+    69                                          repeating:
+    70 0000006D AC                                  lodsb ;in AL avem primul caracter samd 
+    71 0000006E 3C20                                cmp al, 20h ;comparam daca ce e in AL e spatiu 
+    72 00000070 7502                                jne again
+    73 00000072 B020                                mov al, 20h
+    74                                          again:
+    75 00000074 E2F7                                loop repeating 
+    76                                              
+    77                                          ;eax = fprintf(descriptor, result_text)
+    78 00000076 68[43000000]                    push dword result_text
+    79 0000007B FF35[3E000000]                  push dword [descriptor]
+    80 00000081 FF15[00000000]                  call [fprintf]
+    81 00000087 83C408                          add esp, 4*2
+    82                                          
+    83                                      cleanup:
+    84                                          ;eax = fclose(descriptor)
+    85 0000008A FF35[3E000000]                  push dword [descriptor]
+    86 00000090 FF15[00000000]                  call [fclose]
+    87 00000096 83C404                          add esp, 4
+    88                                          
+    89                                      err_:
+    90                                          ;eax = printf(msg_err)
+    91 00000099 68[44000000]                    push dword msg_err
+    92 0000009E FF15[00000000]                  call [printf]
+    93 000000A4 83C404                          add ESP, 4*1
+    94                                          
+    95                                      final:
+    96 000000A7 6A00                            push    dword 0      ; push the parameter for exit onto the stack
+    97 000000A9 FF15[00000000]                  call    [exit]       ; call exit to terminate the program

@@ -1,0 +1,122 @@
+     1                                  bits 32 
+     2                                  global start        
+     3                                  
+     4                                  
+     5                                  extern exit, fopen, fclose, fprintf               
+     6                                  import exit msvcrt.dll    
+     7                                  import fopen msvcrt.dll 
+     8                                  import fclose msvcrt.dll
+     9                                  import fprintf msvcrt.dll 
+    10                                  
+    11                                  ;Se dau un nume de fisier si un text (definite in segmentul de date). Textul contine litere mici, cifre si spatii. 
+    12                                  ;Sa se inlocuiasca toate cifrele de pe pozitii pare cu caracterul ‘X’. 
+    13                                  ;Sa se creeze un fisier cu numele dat si sa se scrie textul obtinut in fisier.
+    14                                  
+    15                                  segment data use32 class=data
+    16                                      
+    17 00000000 707261637469636535-         nume_fisier db 'practice5.txt', 0
+    17 00000009 2E74787400         
+    18 0000000E 7700                        mod_acces db 'w', 0
+    19 00000010 FFFFFFFF                    descriptor dd -1 
+    20 00000014 616E64723369206172-         text db 'andr3i ar3 573 note la mat3', 0
+    20 0000001D 3320353733206E6F74-
+    20 00000026 65206C61206D617433-
+    20 0000002F 00                 
+    21                                      len equ $ - text 
+    22 00000030 00<rept>                    text_final times len db 0 
+    23                                      
+    24                                  segment code use32 class=code
+    25                                      start:
+    26                                          ;opening file practice5.txt 
+    27                                          ;eax = fopen(nume_fisier, mod_acces)
+    28 00000000 68[0E000000]                    push dword mod_acces
+    29 00000005 68[00000000]                    push dword nume_fisier
+    30 0000000A FF15[00000000]                  call [fopen]
+    31 00000010 83C408                          add esp, 4*2 
+    32                                          
+    33 00000013 A3[10000000]                    mov [descriptor], eax 
+    34                                          
+    35 00000018 83F800                          cmp eax, 0
+    36 0000001B 7450                            je final 
+    37                                          
+    38 0000001D B91C000000                      mov ecx, len 
+    39 00000022 BE[14000000]                    mov esi, text 
+    40 00000027 BF[30000000]                    mov edi, text_final
+    41 0000002C BB01000000                      mov ebx, 1
+    42                                      repeta:
+    43 00000031 AC                              lodsb ;incarcam in AL elementul din text 
+    44 00000032 FEC3                            inc bl ;incrementam ca sa ii aflam pozitia
+    45 00000034 F6C301                          test bl, 1b
+    46 00000037 750E                            jnz iesire_repeta
+    47 00000039 3C30                            cmp al, '0'
+    48 0000003B 720A                            jb iesire_repeta
+    49 0000003D 3C39                            cmp al, '9'
+    50 0000003F 7204                            jb change_digit
+    51 00000041 3C39                            cmp al, '9'
+    52 00000043 7702                            ja iesire_repeta
+    53                                      change_digit:
+    54 00000045 B058                            mov al, 'X'
+    55                                      ; ;literally the worst solution that I could have ever thought of 
+    56                                      ; ;I hate myself for doing this
+    57                                      ; change_digit:
+    58                                          ; cmp al, 0
+    59                                          ; je add_digit1
+    60                                          ; cmp al, 1
+    61                                          ; je add_digit2
+    62                                          ; cmp al, 2
+    63                                          ; je add_digit3
+    64                                          ; cmp al, 3
+    65                                          ; je add_digit4
+    66                                          ; cmp al, 4
+    67                                          ; je add_digit5
+    68                                          ; cmp al, 5
+    69                                          ; je add_digit6
+    70                                          ; cmp al, 6
+    71                                          ; je add_digit7
+    72                                          ; cmp al, 7
+    73                                          ; je add_digit8
+    74                                          ; cmp al, 8
+    75                                          ; je add_digit9
+    76                                          ; cmp al, 9
+    77                                          ; je add_digit10
+    78                                      ; add_digit1:
+    79                                          ; add al, 40
+    80                                      ; add_digit2:
+    81                                          ; add al, 39
+    82                                      ; add_digit3:
+    83                                          ; add al, 38
+    84                                      ; add_digit4:
+    85                                          ; add al, 37
+    86                                      ; add_digit5:
+    87                                          ; add al, 36
+    88                                      ; add_digit6:
+    89                                          ; add al, 35
+    90                                      ; add_digit7:
+    91                                          ; add al, 34
+    92                                      ; add_digit8:
+    93                                          ; add al, 33
+    94                                      ; add_digit9:
+    95                                          ; add al, 32
+    96                                      ; add_digit10:
+    97                                          ; add al, 31
+    98                                          
+    99                                      iesire_repeta:
+   100 00000047 AA                              stosb 
+   101 00000048 E2E7                            loop repeta 
+   102                                          
+   103                                          ;print the resulting text in the file
+   104                                          ;eax = fprintf(descriptor, text_final)
+   105 0000004A 68[30000000]                    push dword text_final
+   106 0000004F FF35[10000000]                  push dword [descriptor]
+   107 00000055 FF15[00000000]                  call [fprintf]
+   108 0000005B 83C408                          add esp, 4*2 
+   109                                      
+   110                                          ;closing file
+   111                                          ;eax = fclose(descriptor)
+   112 0000005E FF35[10000000]                  push dword [descriptor]
+   113 00000064 FF15[00000000]                  call [fclose]
+   114 0000006A 83C404                          add esp, 4
+   115                                      
+   116                                      final:
+   117 0000006D 6A00                            push    dword 0      
+   118 0000006F FF15[00000000]                  call    [exit]       

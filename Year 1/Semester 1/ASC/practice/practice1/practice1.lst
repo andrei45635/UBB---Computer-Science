@@ -1,0 +1,65 @@
+     1                                  bits 32 
+     2                                  global start        
+     3                                  
+     4                                  
+     5                                  extern exit, printf, scanf      
+     6                                  import exit msvcrt.dll    
+     7                                  import printf msvcrt.dll
+     8                                  import scanf msvcrt.dll
+     9                                  
+    10                                  ;Se da un numar natural a (a: dword, definit in segmentul de date). 
+    11                                  ;Sa se citeasca un numar natural b si sa se calculeze: a + a/b. 
+    12                                  ;Sa se afiseze rezultatul operatiei. Valorile vor fi afisate in format decimal (baza 10) cu semn.
+    13                                  segment data use32 class=data
+    14                                  
+    15 00000000 0C000000                   a dd 12
+    16 00000004 00000000                   b dd 0
+    17 00000008 00000000                   rez dd 0
+    18 0000000C 496E74726F64756365-        format_citire db 'Introduceti numarul natural b: ', 0
+    18 00000015 7469206E756D617275-
+    18 0000001E 6C206E61747572616C-
+    18 00000027 20623A2000         
+    19 0000002C 256400                     citire_b db '%d', 0
+    20 0000002F 52657A756C74617475-        format_rezultat db 'Rezultatul operatiei a + a/b este: %d', 0
+    20 00000038 6C206F706572617469-
+    20 00000041 65692061202B20612F-
+    20 0000004A 6220657374653A2025-
+    20 00000053 6400               
+    21                                     ;rezultat db '%d', 0
+    22                                     
+    23                                  segment code use32 class=code
+    24                                      start:
+    25                                        ;printf(format_citire)
+    26 00000000 68[0C000000]                  push dword format_citire
+    27 00000005 FF15[00000000]                call [printf]
+    28 0000000B 83C404                        add esp, 4
+    29                                        
+    30                                        ;scanf(citire_b, b)
+    31 0000000E 68[04000000]                  push dword b
+    32 00000013 68[2C000000]                  push dword citire_b
+    33 00000018 FF15[00000000]                call [scanf]
+    34 0000001E 83C408                        add esp, 4*2
+    35                                        
+    36 00000021 A1[00000000]                  mov eax, [a] ;am pus in EDX, valoarea lui a
+    37 00000026 99                            cdq
+    38                                        ;mov edx, 0 ;in EDX:EAX avem a 
+    39 00000027 8B1D[04000000]                mov ebx, [b] ;in EBX avem b 
+    40 0000002D F73D[04000000]                idiv dword [b] ; in EAX o sa avem valoarea impartirii lui a la b
+    41 00000033 8B0D[00000000]                mov ecx, [a] 
+    42 00000039 01C8                          add eax, ecx ;in eax avem rezultatul final 
+    43 0000003B A3[08000000]                  mov [rez], eax 
+    44                                        
+    45                                        ;printf(format_rezultat, rez)
+    46 00000040 FF35[08000000]                push dword [rez]
+    47 00000046 68[2F000000]                  push dword format_rezultat
+    48 0000004B FF15[00000000]                call [printf]
+    49 00000051 83C408                        add esp, 4*2
+    50                                        
+    51                                        ; ;scanf(rezultat, rez)
+    52                                        ; push dword [rez]
+    53                                        ; push dword rezultat
+    54                                        ; call [scanf]
+    55                                        ; add esp, 4*2
+    56                                        
+    57 00000054 6A00                          push    dword 0      
+    58 00000056 FF15[00000000]                call    [exit]       

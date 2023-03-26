@@ -1,0 +1,140 @@
+     1                                  bits 32 
+     2                                  global start        
+     3                                  
+     4                                  extern exit, fopen, fclose, fwrite, fread, fprintf                
+     5                                  import exit msvcrt.dll   
+     6                                  import fopen msvcrt.dll 
+     7                                  import fclose msvcrt.dll 
+     8                                  import fwrite msvcrt.dll 
+     9                                  import fread msvcrt.dll 
+    10                                  import fprintf msvcrt.dll
+    11                                  
+    12                                  ;litere mic -> ascii
+    13                                  segment data use32 class=data
+    14                                  
+    15 00000000 707261637469636538-           nume_fisier_1 db 'practice8.txt', 0
+    15 00000009 2E74787400         
+    16 0000000E 7200                          mod_acces_1 db 'r', 0
+    17 00000010 FFFFFFFF                      descriptor_1 dd -1 
+    18 00000014 6F75747075742E7478-           nume_fisier_2 db 'output.txt', 0
+    18 0000001D 7400               
+    19 0000001F 7700                          mod_acces_2 db 'w', 0
+    20 00000021 FFFFFFFF                      descriptor_2 dd -1
+    21                                        len_text equ 100
+    22 00000025 <res 00000064>                text resb len_text ;asta e buffer ul practic 
+    23 00000089 00                            nr_car_citite db 0
+    24 0000008A 00<rept>                      result_text times (len_text + len_text) db 0
+    25 00000152 256400                        format_mic db '%d', 0
+    26 00000155 257300                        format_mare db '%s', 0
+    27                                        
+    28                                    
+    29                                  segment code use32 class=code
+    30                                      start:
+    31                                      
+    32                                          ;eax = fopen(nume_fisier_1, mod_acces_1)
+    33 00000000 68[0E000000]                    push dword mod_acces_1
+    34 00000005 68[00000000]                    push dword nume_fisier_1
+    35 0000000A FF15[00000000]                  call [fopen]
+    36 00000010 83C408                          add esp, 4*2 
+    37                                          
+    38 00000013 A3[10000000]                    mov [descriptor_1], eax 
+    39                                          
+    40 00000018 83F800                          cmp eax, 0
+    41 0000001B 0F84BA000000                    je final 
+    42                                          
+    43                                          ;eax = fopen(nume_fisier_2, mod_acces_2)
+    44 00000021 68[1F000000]                    push dword mod_acces_2
+    45 00000026 68[14000000]                    push dword nume_fisier_2
+    46 0000002B FF15[00000000]                  call [fopen]
+    47 00000031 83C408                          add esp, 4*2 
+    48                                          
+    49 00000034 A3[21000000]                    mov [descriptor_2], eax 
+    50                                          
+    51 00000039 83F800                          cmp eax, 0
+    52 0000003C 0F8499000000                    je final 
+    53                                          
+    54                                      repeta:
+    55                                      
+    56                                          ;eax = fread(text, 1, len_text, descriptor_1)
+    57 00000042 FF35[10000000]                  push dword [descriptor_1]
+    58 00000048 6A64                            push dword len_text
+    59 0000004A 6A01                            push dword 1 
+    60 0000004C 68[25000000]                    push dword text
+    61 00000051 FF15[00000000]                  call [fread]
+    62 00000057 83C410                          add esp, 4*4 ;in EAX o sa fie numarul de caractere citite 
+    63                                          
+    64                                          ;mov [nr_car_citite], eax 
+    65                                          
+    66 0000005A 83F800                          cmp eax, 0
+    67 0000005D 745E                            je cleanup 
+    68                                          
+    69 0000005F 89C1                            mov ecx, eax
+    70 00000061 E378                            jecxz final 
+    71 00000063 FC                              cld 
+    72 00000064 BE[25000000]                    mov esi, text ;ESI = AncaT 
+    73 00000069 BF[8A000000]                    mov edi, result_text
+    74                                          
+    75                                       repeating:
+    76                                       
+    77 0000006E AC                              lodsb ;in AL o sa fie primul caracter samd, in AL o sa fie 'A'
+    78 0000006F 3C41                            cmp al, 'A'
+    79 00000071 7700                            ja check1
+    80                                          
+    81                                       check1:
+    82                                       
+    83 00000073 3C5A                            cmp al, 'Z'
+    84 00000075 7202                            jb good_char 
+    85                                          ;in AL avem o litera mica daca a trecut de toate check-urile
+    86 00000077 EB21                            jmp bad_char
+    87                                          
+    88                                       good_char:
+    89                                       
+    90 00000079 8807                            mov [edi], al 
+    91 0000007B 50                              push eax
+    92 0000007C 51                              push ecx
+    93                                          ;fprintf(descriptor_2, format_mare, result_text)
+    94 0000007D 68[8A000000]                    push dword result_text
+    95 00000082 68[55010000]                    push dword format_mare
+    96 00000087 FF35[21000000]                  push dword [descriptor_2]
+    97 0000008D FF15[00000000]                  call [fprintf]
+    98 00000093 83C40C                          add esp, 4*3
+    99 00000096 59                              pop ecx 
+   100 00000097 58                              pop eax 
+   101 00000098 EB1F                            jmp looping
+   102                                          
+   103                                       bad_char:
+   104                                       
+   105 0000009A 8807                            mov [edi], al  
+   106 0000009C 50                              push eax 
+   107 0000009D 51                              push ecx        
+   108                                          ;fprintf(descriptor_2, format_mic, result_text)
+   109 0000009E 68[8A000000]                    push dword result_text
+   110 000000A3 68[52010000]                    push dword format_mic
+   111 000000A8 FF35[21000000]                  push dword [descriptor_2]
+   112 000000AE FF15[00000000]                  call [fprintf]
+   113 000000B4 83C40C                          add esp, 4*3
+   114 000000B7 59                              pop ecx 
+   115 000000B8 58                              pop eax 
+   116                                          
+   117                                       looping:
+   118                                       
+   119 000000B9 E2B3                            loop repeating
+   120                                       
+   121 000000BB EB85                         jmp repeta
+   122                                        
+   123                                       cleanup: 
+   124                                          
+   125                                          ;eax = fclose(descriptor_1)
+   126 000000BD FF35[10000000]                  push dword [descriptor_1]
+   127 000000C3 FF15[00000000]                  call [fclose]
+   128 000000C9 83C404                          add esp, 4
+   129                                          
+   130                                          ;eax = fclose(descriptor_2)
+   131 000000CC FF35[21000000]                  push dword [descriptor_2]
+   132 000000D2 FF15[00000000]                  call [fclose]
+   133 000000D8 83C404                          add esp, 4
+   134                                      
+   135                                      final:
+   136                                      
+   137 000000DB 6A00                            push    dword 0      
+   138 000000DD FF15[00000000]                  call    [exit]      

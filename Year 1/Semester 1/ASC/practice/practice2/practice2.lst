@@ -1,0 +1,84 @@
+     1                                  bits 32 
+     2                                  global start        
+     3                                  
+     4                                  extern exit, printf, scanf        
+     5                                  import exit msvcrt.dll    
+     6                                  import printf msvcrt.dll
+     7                                  import scanf msvcrt.dll
+     8                                  
+     9                                  ;Sa se citeasca de la tastatura in baza 16 doua numere a si b de tip dword si sa se afiseze suma partilor low si diferenta partilor high. 
+    10                                  ;Exemplu:
+    11                                  ;a = 00101A35h, b = 00023219h
+    12                                  ;suma = 4C4Eh
+    13                                  ;diferenta = Eh
+    14                                  segment data use32 class=data
+    15                                      
+    16 00000000 496E74726F64756365-         format_citire_a db 'Introduceti a: ', 0
+    16 00000009 746920613A2000     
+    17 00000010 257800                      citire_a db '%x', 0
+    18 00000013 496E74726F64756365-         format_citire_b db 'Introduceti b: ', 0
+    18 0000001C 746920623A2000     
+    19 00000023 257800                      citire_b db '%x', 0
+    20 00000026 00000000                    a dd 0 
+    21 0000002A 00000000                    b dd 0
+    22 0000002E 00000000                    dif1 dd 0
+    23 00000032 00000000                    dif2 dd 0
+    24 00000036 00000000                    suma dd 0 
+    25 0000003A 53756D612070617274-         format_rezultat db 'Suma partilor low este: %x, iar ', 0
+    25 00000043 696C6F72206C6F7720-
+    25 0000004C 657374653A2025782C-
+    25 00000055 206961722000       
+    26 0000005B 00000000                    diferenta dd 0 
+    27 0000005F 6469666572656E7461-         format_diferenta db 'diferenta partilor high este: %x', 0
+    27 00000068 2070617274696C6F72-
+    27 00000071 206869676820657374-
+    27 0000007A 653A20257800       
+    28                                      
+    29                                  segment code use32 class=code
+    30                                      start:
+    31                                          ;printf(format_citire_a)
+    32 00000000 68[00000000]                    push dword format_citire_a
+    33 00000005 FF15[00000000]                  call [printf]
+    34 0000000B 83C404                          add esp, 4
+    35                                          
+    36                                          ;scanf(citire_a, a)
+    37 0000000E 68[26000000]                    push dword a 
+    38 00000013 68[10000000]                    push dword citire_a
+    39 00000018 FF15[00000000]                  call [scanf]
+    40 0000001E 83C408                          add esp, 4*2
+    41                                          
+    42                                          ;printf(format_citire_b)
+    43 00000021 68[13000000]                    push dword format_citire_b
+    44 00000026 FF15[00000000]                  call [printf]
+    45 0000002C 83C404                          add esp, 4
+    46                                          
+    47                                          ;scanf(citire_b, b)
+    48 0000002F 68[2A000000]                    push dword b 
+    49 00000034 68[23000000]                    push dword citire_b
+    50 00000039 FF15[00000000]                  call [scanf]
+    51 0000003F 83C408                          add esp, 4*2
+    52                                          
+    53 00000042 A1[26000000]                    mov eax, [a] 
+    54 00000047 8B1D[2A000000]                  mov ebx, [b]
+    55 0000004D 6601D8                          add ax, bx ;in AX va fi suma partilor low 
+    56 00000050 66A3[36000000]                  mov [suma], ax 
+    57                                          
+    58 00000056 668B0D[28000000]                mov cx, [a+2]
+    59 0000005D 668B15[2C000000]                mov dx, [b+2]
+    60 00000064 6629D1                          sub cx, dx 
+    61 00000067 66890D[5B000000]                mov [diferenta], cx 
+    62                                          
+    63                                          ;printf(format_rezultat, suma)
+    64 0000006E FF35[36000000]                  push dword [suma] 
+    65 00000074 68[3A000000]                    push dword format_rezultat
+    66 00000079 FF15[00000000]                  call [printf] 
+    67 0000007F 83C408                          add esp, 4*2
+    68                                          
+    69                                          ;printf(format_diferenta, diferenta)
+    70 00000082 FF35[5B000000]                  push dword [diferenta]
+    71 00000088 68[5F000000]                    push dword format_diferenta
+    72 0000008D FF15[00000000]                  call [printf]
+    73 00000093 83C408                          add esp, 4*2
+    74                                          
+    75 00000096 6A00                            push    dword 0      
+    76 00000098 FF15[00000000]                  call    [exit]       

@@ -1,0 +1,121 @@
+     1                                  bits 32 
+     2                                  global start        
+     3                                  
+     4                                  
+     5                                  extern exit, fopen, fprintf, printf, scanf, fclose, fread                
+     6                                  import exit msvcrt.dll    
+     7                                  import fopen msvcrt.dll
+     8                                  import fclose msvcrt.dll
+     9                                  import fprintf msvcrt.dll
+    10                                  import printf msvcrt.dll 
+    11                                  import scanf msvcrt.dll
+    12                                  import fread msvcrt.dll 
+    13                                  
+    14                                  ;Se da un fisier text. Sa se citeasca continutul fisierului, 
+    15                                  ;sa se contorizeze numarul de cifre pare si sa se afiseze aceasta valoare
+    16                                  ;Numele fisierului text este definit in segmentul de date.
+    17                                  segment data use32 class=data
+    18                                  
+    19 00000000 707261637469636533-         nume_fisier db 'practice3.txt', 0 
+    19 00000009 2E74787400         
+    20 0000000E 7200                        mod_acces db 'r', 0
+    21 00000010 FFFFFFFF                    descriptor dd -1 
+    22 00000014 4E756D6172756C2064-         format_pare db 'Numarul de cifre pare este %d',0
+    22 0000001D 652063696672652070-
+    22 00000026 617265206573746520-
+    22 0000002F 256400             
+    23                                      len_fisier equ 100 
+    24 00000032 00<rept>                    text_fisier times (len_fisier+1) db 0 
+    25 00000097 00000000                    cifra dd 0
+    26 0000009B <res 00000064>              buffer resb len_fisier
+    27 000000FF 00000000                    nr_car_citite dd 0 
+    28                                      
+    29                                  segment code use32 class=code
+    30                                      start:
+    31                                      
+    32                                          ;opening fisierul practice3.txt 
+    33                                          ;eax = fopen(nume_fisier, mod_acces)
+    34                                          ;functia va returna 0 daca nu a mers operatia de opening 
+    35 00000000 68[0E000000]                    push dword mod_acces
+    36 00000005 68[00000000]                    push dword nume_fisier
+    37 0000000A FF15[00000000]                  call [fopen] 
+    38 00000010 83C408                          add esp, 4*2
+    39                                          
+    40                                          
+    41                                          ;punem in eax descriptorul 
+    42 00000013 A3[10000000]                    mov [descriptor], eax 
+    43                                          
+    44 00000018 83F800                          cmp eax, 0 
+    45 0000001B 7450                            je final
+    46                                      
+    47                                          ;refacem citirea folosind bucla 
+    48                                          ; echivalentul in pseudocod al urmatoarei secvente de cod este:
+    49                                          ;repeta
+    50                                          ;   nr_car_citite = fread(buffer, 1, len, descriptor_fis)
+    51                                          ;   daca nr_car_citite > 0
+    52                                          ;       ; instructiuni pentru procesarea caracterelor citite in aceasta etapa
+    53                                          ;pana cand nr_car_citite == 0
+    54                                          ; bucla:
+    55                                              ; push dword [descriptor]
+    56                                              ; push dword len_fisier
+    57                                              ; push dword 1 
+    58                                              ; push dword buffer 
+    59                                              ; call [fread]
+    60                                              ; add esp, 4*4 ;in EAX avem numarul de caractere citite
+    61                                              
+    62                                              ; cmp eax, 0
+    63                                              ; je cleanup
+    64                                              
+    65                                              ; mov [nr_car_citite], eax 
+    66                                              
+    67                                                  ; mov ecx, len_fisier 
+    68                                                  ; mov esi, text_fisier
+    69                                              ; repeta:
+    70                                                  ; lodsb ;punem in eax fiecare element 
+    71                                                  ; test al, 1b ;verificam daca numarul din eax este par 
+    72                                                  ; jnz look_again
+    73                                                  ; inc ebx 
+    74                                              ; look_again:
+    75                                                  ; loop repeta 
+    76                                              ; mov [cifra], ebx 
+    77                                              
+    78                                              ; jmp bucla 
+    79                                          
+    80                                          
+    81                                          ;citim textul folosind functia fread
+    82                                          ;eax = fread(text_fisier, 1, len_fisier, descriptor)
+    83 0000001D FF35[10000000]                  push dword [descriptor]
+    84 00000023 6A64                            push dword len_fisier
+    85 00000025 6A01                            push dword 1
+    86 00000027 68[32000000]                    push dword text_fisier
+    87 0000002C FF15[00000000]                  call [fread]
+    88 00000032 83C410                          add esp, 4*4 ;in EAX avem numarul de caractere citite 
+    89                                          
+    90                                          
+    91 00000035 89C1                             mov ecx, eax
+    92 00000037 BE[32000000]                     mov esi, text_fisier
+    93                                        repeta:
+    94 0000003C AC                               lodsb ;punem in eax fiecare element 
+    95 0000003D A801                             test al, 1b ;verificam daca numarul din eax este par 
+    96 0000003F 7501                             jnz look_again
+    97 00000041 43                               inc ebx 
+    98                                        look_again:
+    99 00000042 E2F8                              loop repeta 
+   100 00000044 881D[97000000]                    mov [cifra], bl 
+   101                                          
+   102                                          ;printf(format_pare, cifra)
+   103 0000004A FF35[97000000]                  push dword [cifra]
+   104 00000050 68[14000000]                    push dword format_pare
+   105 00000055 FF15[00000000]                  call [printf]
+   106 0000005B 83C408                          add esp, 4*2
+   107                                          
+   108                                      ;cleanup:
+   109                                          ;inchidem fisierul folosind fclose 
+   110                                          ;eax = fclose(descriptor)
+   111 0000005E FF35[10000000]                  push dword [descriptor]
+   112 00000064 FF15[00000000]                  call [fclose]
+   113 0000006A 83C404                          add esp, 4
+   114                                          
+   115                                      final:
+   116 0000006D 6A00                            push    dword 0      
+   117 0000006F FF15[00000000]                  call    [exit]       

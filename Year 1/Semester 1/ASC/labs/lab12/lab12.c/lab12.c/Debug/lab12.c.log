@@ -1,0 +1,2 @@
+﻿mainbases.obj : error LNK2019: unresolved external symbol _changebase referenced in function _main_funct
+c:\Users\Andrei\source\repos\lab12.c\Debug\lab12.c.exe : fatal error LNK1120: 1 unresolved externals

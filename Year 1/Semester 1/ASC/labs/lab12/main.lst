@@ -1,0 +1,58 @@
+     1                                  bits 32 
+     2                                       
+     3                                  global _changebase 
+     4                                  
+     5                                  ;Se citeste de la tastatura un sir de mai multe numere in baza 2. 
+     6                                  ;Sa se afiseze aceste numere in baza 16.
+     7                                  ;Am incercat sa implementez algoritmul de schimbare de baza, dar nu imi afiseaza nimic
+     8                                  
+     9                                  segment data use32 class=data
+    10 00000000 00                           mem_power db 0 
+    11 00000001 00000000                     suma dd 0
+    12                                  
+    13                                  segment code use32 class=code
+    14                                      ;void changebase(char sir1[], int len)
+    15                                      _changebase:
+    16                                      ;crearea unui cadru de stiva (stackframe) pentru programul apelat 
+    17 00000000 55                              push ebp
+    18 00000001 89E5                            mov ebp, esp
+    19 00000003 60                              pushad  ;pusham valorile initiale are registrilor si le restauram la final
+    20                                          
+    21                                          ;[ebp]    -> valoarea ebp pentru apelant
+    22                                          ;[ebp+4]  -> adresa de revenire
+    23                                          ;[ebp+8]  -> sir1
+    24                                          ;[ebp+12] -> len
+    25                                          
+    26 00000004 8B7508                          mov esi, [ebp+8]    ;in ESI o sa avem sir1[i]  
+    27 00000007 8B4D0C                          mov ecx, [ebp+12]   ;in ECX o sa avem len(sir1)
+    28 0000000A 89CB                            mov ebx, ecx ;luam de la final elementul sir1[i]
+    29 0000000C 4B                              dec ebx ;pt sirul 10101010, in ebx o sa avem EBX = 7 pt 1 * 2^7
+    30                                          repeta:
+    31 0000000D AC                                  lodsb ;punem caracterul in al
+    32 0000000E 2C30                                sub al, 30h ;convertim din ascii in cifre 
+    33 00000010 A2[00000000]                        mov byte [mem_power], al ;elementul curent il mutam in memorie  
+    34 00000015 B801000000                          mov eax, 1 ;punem 1 in EAX ca sa inmultim puterile 
+    35 0000001A 51                                  push ecx 
+    36 0000001B 89D9                                mov  ecx, ebx ;punem in ECX valoarea lungimii elementului 
+    37 0000001D 53                                  push ebx            
+    38 0000001E BB02000000                          mov  ebx, 2 ;mutam 2 in EBX pentru ca o sa facem EAX = EAX * EBX 
+    39                                              power:
+    40 00000023 F7E3                                    mul ebx     ;eax = ebx * 2
+    41 00000025 E2FC                                    loop power ;o sa avem eax = 2 ^ 7 pt primul element, eax = 2 ^ 6 pt al doilea etc 
+    42 00000027 89C2                                mov edx, eax ;in EDX mutam puterile 
+    43 00000029 A0[00000000]                        mov al, byte [mem_power] ;in AL mutam iar elementul din memorie 
+    44 0000002E 3C01                                cmp al, 1 ;daca in AL o sa fie caracterul 1, atunci adunam in suma, ce e in EDX 
+    45 00000030 7506                                jne continue 
+    46 00000032 0115[01000000]                      add [suma], edx ;adunam puterile de la 1 
+    47                                              continue:
+    48 00000038 5B                                      pop ebx 
+    49 00000039 59                                      pop ecx 
+    50                                                  ;dec ebx ;decrementam EBX ca sa trecem la cealalta putere 
+    51 0000003A E2D1                                    loop repeta 
+    52                                          ;refacem cadrul de stiva pentru programul apelant
+    53 0000003C 61                              popad   ;restauram valorile initiale ale registrilor
+    54 0000003D A1[01000000]                    mov eax, [suma]
+    55 00000042 89EC                            mov esp, ebp
+    56 00000044 5D                              pop ebp
+    57                                          ;intoarcem rezultatul din EAX 
+    58 00000045 C3                              ret  

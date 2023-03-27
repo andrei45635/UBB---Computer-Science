@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
 </head>
 <body>
-<h2 style="color: #FF0000"> TODO: Add OOP and DSA </h2>
 <h2> My projects as a student at UBB, Faculty of Mathematics and Computer Science, taught in Romanian </h2>
 <div>
     <p style="font-weight: bold; font-size: 18px;"> First Year </p>

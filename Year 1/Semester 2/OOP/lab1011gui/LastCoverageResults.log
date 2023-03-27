@@ -1,0 +1,21 @@
+[2022-05-13 21:11:20] [info] Start Program:
+Path:"C:\Users\Andrei\Desktop\Facultate\OOP\lab1011gui\x64\Debug\lab1011gui.exe"
+Arguments:
+Working directory: "C:\Users\Andrei\Desktop\Facultate\OOP\lab1011gui\"
+Modules: Selected: C:\Users\Andrei\Desktop\Facultate\OOP\lab1011gui\x64\Debug\lab1011gui.exe Excluded: 
+Sources: Selected: C:\Users\Andrei\Desktop\Facultate\OOP\lab1011gui Excluded: 
+Log Level: Normal
+Cover Children: 0
+Aggregate by file: 1
+Continue after C++ exception: 0
+Optimized build support: 0
+Export: Binary C:\Users\Andrei\AppData\Local\Temp\d2hyx4xn.zsk 
+Input coverage: 
+Unified diff: 
+Excluded line regular expressions: 
+Substitute pdb source paths: 
+
+[2022-05-13 21:11:20] [info] Module: C:\Users\Andrei\Desktop\Facultate\OOP\lab1011gui\x64\Debug\lab1011gui.exe is selected because it matches selected pattern: C:\Users\Andrei\Desktop\Facultate\OOP\lab1011gui\x64\Debug\lab1011gui.exe
+[2022-05-13 21:11:22] [info] ----------------------------------------------------
+[2022-05-13 21:11:22] [info] Coverage binary generated in file: C:\Users\Andrei\AppData\Local\Temp\d2hyx4xn.zsk
+[2022-05-13 21:11:22] [info] ----------------------------------------------------

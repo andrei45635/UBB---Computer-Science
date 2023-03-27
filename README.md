@@ -6,7 +6,7 @@
 <body>
 <h2> My projects as a student at UBB, Faculty of Mathematics and Computer Science, taught in Romanian </h2>
 <div>
-    <p style="font-weight: bold; font-size: 18px;"> **First Year** </p>
+    <p style="font-weight: bold; font-size: 18px;"> First Year </p>
     <ol>
         <li>
             <p style="font-weight: bold"> First Semester </p>
@@ -32,7 +32,7 @@
 </div>
 
 <div>
-    <p style="font-weight: bold; font-size: 18px;"> **Second Year** </p>
+    <p style="font-weight: bold; font-size: 18px;"> Second Year </p>
     <ol>
         <li>
             <p style="font-weight: bold"> Third Semester </p>

@@ -1,4 +1,4 @@
-##Advanced Programming Methods 
+<h2 style="font-weight: bold;"> Advanced Programming Methods </h2>
 <p> Tools used: JavaFX, JDBC, Gradle and LINQ (for C#) </p>
 <p> Semester projects that I built: </p>
   <ol>

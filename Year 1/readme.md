@@ -18,6 +18,7 @@
                 <li> Object Oriented Programming</li>
                 <li> Graphs Algorithms</li>
                 <li> Data Structures and Algorithms</li>
+                <li> Operating Systems </li>
             </ul>
         </li>
     </ol>

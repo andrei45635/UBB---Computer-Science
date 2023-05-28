@@ -41,8 +41,8 @@
                 <li> <a href="https://github.com/andrei45635/PLF"> Functional and Logic Programming </a> </li>
                 <li> <a href="https://github.com/andrei45635/BD"> Databases </a> </li>
                 <li> <a href="https://github.com/andrei45635/Probabilitati-si-Statistica"> Probabilities and Statistics </a> </li>
+                <li> <a href="https://github.com/andrei45635/UBB---Computer-Science/tree/main/Year%202/Semester%203/MAP"> Advanced Programming Methods </a> </li>
                 <li> Computer Networks</li>
-                <li> Advanced Programming Methods</li>
             </ul>
         </li>
         <li>

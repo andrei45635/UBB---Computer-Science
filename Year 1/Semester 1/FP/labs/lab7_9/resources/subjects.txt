@@ -1,0 +1,11 @@
+1,Vidya,Radu Placinta
+2,Talent,Radu Placinta
+3,Stil,Lex Iaurt
+4,Dikkiter,Nyesteban
+5,Mathematics,Alice Johnson
+6,History,David Williams
+7,Chemistry,Sarah Davis
+8,Computer Science,Michael Brown
+9,Literature,Emily Wilson
+10,Physics,Robert Miller
+11,Test,Krem

@@ -11,10 +11,14 @@
                 <li> Virtual Reality </li>
             </ul>
         </li>
-        <li>
+         <li> 
             <p style="font-weight: bold"> Sixth Semester </p>
             <ul>
-                <li> WIP </li>
+                <li> Numerical Analysis (Calcul Numeric) </li>
+                <li> VVSS </li>
+                <li> Elaborarea Lucrarii de Licenta </li>
+                <li> Network and Systems Administration </li>
+                <li> Optimization Techniques </li>
             </ul>
         </li>
     </ol>
